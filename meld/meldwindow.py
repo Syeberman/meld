@@ -139,24 +139,17 @@ class MeldWindow(Component):
         # Manually handle shells that don't show an application menu
         gtk_settings = Gtk.Settings.get_default()
         if not gtk_settings.props.gtk_shell_shows_app_menu:
-            from meld.meldapp import app
-
-            def make_app_action(name):
-                def app_action(*args):
-                    app.lookup_action(name).activate(None)
-                return app_action
-
             app_actions = (
                 ("AppMenu", None, _("_Meld")),
                 ("Quit", Gtk.STOCK_QUIT, None, None, _("Quit the program"),
-                 make_app_action('quit')),
+                 _make_app_action('quit')),
                 ("Preferences", Gtk.STOCK_PREFERENCES, _("Prefere_nces"), None,
                  _("Configure the application"),
-                 make_app_action('preferences')),
+                 _make_app_action('preferences')),
                 ("Help", Gtk.STOCK_HELP, _("_Contents"), "F1",
-                 _("Open the Meld manual"), make_app_action('help')),
+                 _("Open the Meld manual"), _make_app_action('help')),
                 ("About", Gtk.STOCK_ABOUT, None, None,
-                 _("About this application"), make_app_action('about')),
+                 _("About this application"), _make_app_action('about')),
             )
 
             app_actiongroup = Gtk.ActionGroup(name="AppActions")
@@ -190,6 +183,7 @@ class MeldWindow(Component):
             ("<Alt>KP_Down", self.on_menu_edit_down_activate),
             ("<Alt>KP_Up", self.on_menu_edit_up_activate),
             ("F5", self.on_menu_refresh_activate),
+            ("Escape", _make_app_action('quit')),
         )
 
         accel_group = self.ui.get_accel_group()
@@ -699,3 +693,10 @@ class MeldWindow(Component):
             def __getattr__(self, a):
                 return lambda *x: None
         return DummyDoc()
+
+def _make_app_action(name):
+    from meld.meldapp import app
+    def app_action(*args):
+        app.lookup_action(name).activate(None)
+    return app_action
+
